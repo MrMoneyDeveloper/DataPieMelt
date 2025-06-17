@@ -1,7 +1,10 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const winston = require('winston');
 const { createClient } = require('redis');
+const Cache = require('./helpers/cache');
+require('dotenv').config();
 
 const requestLogger = require('./middlewares/requestLogger');
 const errorHandler = require('./middlewares/errorHandler');
@@ -10,10 +13,19 @@ const OperationFactory = require('./operations/OperationFactory');
 const app = express();
 app.use(express.json());
 
-// Configure Winston logger
+// Ensure logs and output directories exist
+const logsDir = path.join(__dirname, 'logs');
+const outputDir = path.join(__dirname, 'output');
+fs.mkdirSync(logsDir, { recursive: true });
+fs.mkdirSync(outputDir, { recursive: true });
+
+// Configure Winston logger with timestamped format
 const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.simple(),
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
+  ),
   transports: [
     new winston.transports.File({ filename: path.join(__dirname, 'logs', 'app.log') }),
     new winston.transports.Console()
@@ -21,9 +33,12 @@ const logger = winston.createLogger({
 });
 
 // Redis client for caching results
-const redisClient = createClient();
+const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
 redisClient.on('error', err => logger.error(`Redis error: ${err.message}`));
 redisClient.connect().catch(err => logger.error(`Redis connect error: ${err.message}`));
+
+// Wrap Redis with in-memory fallback cache
+const cache = new Cache(redisClient, logger);
 
 // Request logging middleware
 app.use(requestLogger(logger));
@@ -31,7 +46,7 @@ app.use(requestLogger(logger));
 // Serve static files from output directory
 app.use('/output', express.static(path.join(__dirname, 'output')));
 
-const factory = new OperationFactory(logger, redisClient);
+const factory = new OperationFactory(logger, cache);
 
 // API route to handle operation execution requests
 app.post('/api/run', async (req, res, next) => {
