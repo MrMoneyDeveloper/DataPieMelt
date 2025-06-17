@@ -25,6 +25,7 @@ displaying results)
 ├── backend/ # Node.js backend (Express server)
 │ ├── package.json # Backend dependencies (express, winston, etc.)
 │ ├── server.js # Express app initialization and routes
+│ ├── operations/ # Operation classes implementing unified interface
 │ ├── routes/ # (Optional) Express route modules
 │ │ └── operations.js # Route handler for operation requests (if
 separated)
@@ -66,7 +67,7 @@ A display area for step-by-step trace logs of code execution. This can be a scro
 updating as the backend returns them.
 An area to show the result of the operation – which could be a numeric result, a success message, or
 an image/visualization (for R plotting operations).
-Basic error handling in the UI (displaying error messages if the backend returns an error).
+Smooth animations are provided using GSAP, and a global error boundary ensures the UI continues to work even if a component throws.
 Example UI Flow: The user enters a number (or uses a default), clicks "Run Factorial". The app calls the
 backend API to execute the factorial operation. While waiting, it could show a loading indicator. When the
 response arrives, the UI shows the returned logs line by line (to illustrate the code execution flow) and the
@@ -208,6 +209,7 @@ app.use('/output', express.static(path.join(__dirname, 'output'))) will allow th
 frontend to request http://localhost:5000/output/plot_output.png and get the image.
 Backend Code (server.js):
 Below is a simplified version of the Express server ( backend/server.js ) highlighting the core
+Operations in the backend are implemented as classes extending a common Operation base and created through an OperationFactory.
 functionality:
 const path = require('path');
 const express = require('express');
@@ -619,25 +621,20 @@ Running the Project (Installation & Usage)
 To get started with this unified project, follow these steps:
 Prerequisites: Ensure you have Node.js (and npm) installed, as well as Python 3 and R installed on
 your system.
-Python is needed to run the Python scripts. (If the Python scripts use extra libraries like snoop ,
-install them via pip . For example, run pip install snoop or use
-pip install -r backend/scripts/python/requirements.txt if such a file is provided.)
+Python is needed to run the Python scripts. Extra libraries such as numpy and pandas
+are listed in backend/requirements.txt. Install them with
+pip install -r backend/requirements.txt (and any other packages like snoop if needed).
 R is needed to run the R scripts. Make sure to install the R packages used by the scripts. In our
 example, we need the ggplot2 package. You can install it by launching R and running
 install.packages("ggplot2") .
 Ensure the commands python and Rscript are available in your PATH (so that Node can call
 them).
+You will also need a running Redis server for the backend caching example.
 Install dependencies: In the project root, run:
 npm install
 This will install root devDependencies (like concurrently). Then run:
 npm run install-all
-5
-1.
-2.
-3.
-4.
-5.
-15
+This installs the backend packages (including Redis support) and the frontend packages such as React, axios, and GSAP for animations.
 This will install dependencies for both the backend and frontend sub-projects (it runs
 npm install in each). Alternatively, you can manually run npm install in frontend/ and
 npm install in backend/ if you prefer.
