@@ -1,6 +1,9 @@
 node_modules/
-backend/logs/
-backend/output/
+backend/logs/*
+!backend/logs/.gitkeep
+backend/output/*
+!backend/output/.gitkeep
 package-lock.json
 frontend/package-lock.json
 backend/package-lock.json
+.env

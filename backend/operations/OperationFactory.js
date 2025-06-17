@@ -2,17 +2,17 @@ const FactorialOperation = require('./FactorialOperation');
 const PlotOperation = require('./PlotOperation');
 
 class OperationFactory {
-  constructor(logger, redisClient) {
+  constructor(logger, cache) {
     this.logger = logger;
-    this.redisClient = redisClient;
+    this.cache = cache;
   }
 
   create(op) {
     switch (op) {
       case 'factorial':
-        return new FactorialOperation(this.logger, this.redisClient);
+        return new FactorialOperation(this.logger, this.cache);
       case 'plot':
-        return new PlotOperation(this.logger, this.redisClient);
+        return new PlotOperation(this.logger, this.cache);
       default:
         return null;
     }

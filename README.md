@@ -629,7 +629,10 @@ example, we need the ggplot2 package. You can install it by launching R and runn
 install.packages("ggplot2") .
 Ensure the commands python and Rscript are available in your PATH (so that Node can call
 them).
-You will also need a running Redis server for the backend caching example.
+You will also need a running Redis server for the backend caching example. Copy
+the provided `.env.example` to `.env` and adjust values like `PORT`,
+`LOG_LEVEL`, or `REDIS_URL` if needed. If Redis is not running, the server will
+fall back to an in-memory cache.
 Install dependencies: In the project root, run:
 npm install
 This will install root devDependencies (like concurrently). Then run:

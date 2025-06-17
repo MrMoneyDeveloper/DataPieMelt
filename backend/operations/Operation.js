@@ -1,7 +1,7 @@
 class Operation {
-  constructor(logger, redisClient) {
+  constructor(logger, cache) {
     this.logger = logger;
-    this.redisClient = redisClient;
+    this.cache = cache;
   }
 
   async run(param) {
